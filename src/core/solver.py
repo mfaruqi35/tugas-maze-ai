@@ -75,6 +75,9 @@ def reconstruct_path(parent, start, end):
     cur = end
     while cur is not None:
         path.append(cur)
-        cur = parent[cur[0]][cur[1]]
+        r, c = cur
+        if parent[r][c] is None:
+            break  # sudah sampai di start
+        cur = parent[r][c]
     path.reverse()
     return path
