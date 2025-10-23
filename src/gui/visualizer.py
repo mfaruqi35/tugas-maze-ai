@@ -104,56 +104,70 @@ class Button:
 # ----------------------------------------------------------
 def draw(screen, events, data):
     pygame.font.init()
-    font = pygame.font.SysFont("Arial", 32, bold=True)
+    font = pygame.font.SysFont("Arial", int(screen.get_height() * 0.02) + 20, bold=True)
 
+    # Ambil ukuran layar
     WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
-    MARGIN, PANEL_GAP, INNER_PADDING = 75, 40, 10
 
-    # Layout
+    # Layout proporsional
+    MARGIN = int(WINDOW_WIDTH * 0.03)
+    PANEL_GAP = int(WINDOW_WIDTH * 0.015)
+    INNER_PADDING = int(WINDOW_WIDTH * 0.005)
+
+    # Ukuran panel kiri-kanan (rasio 30:70)
     frame_rect = pygame.Rect(MARGIN, MARGIN, WINDOW_WIDTH - 2*MARGIN, WINDOW_HEIGHT - 2*MARGIN)
-    left_width = 847
-    left_panel = pygame.Rect(frame_rect.x, frame_rect.y, left_width, frame_rect.height)
-    right_panel = pygame.Rect(left_panel.right + PANEL_GAP, frame_rect.y,
-                              frame_rect.width - left_width - PANEL_GAP, frame_rect.height)
+    left_width = int(frame_rect.width * 0.3)
+    right_width = frame_rect.width - left_width - PANEL_GAP
 
-    # Panel dasar
+    left_panel = pygame.Rect(frame_rect.x, frame_rect.y, left_width, frame_rect.height)
+    right_panel = pygame.Rect(left_panel.right + PANEL_GAP, frame_rect.y, right_width, frame_rect.height)
+
+    # Warna dasar
     pygame.draw.rect(screen, (100, 100, 100), left_panel)
     pygame.draw.rect(screen, (0, 0, 0), right_panel)
 
+    # Panel kiri dalam
     left_inner = pygame.Rect(
-        left_panel.x + INNER_PADDING, left_panel.y + INNER_PADDING,
-        left_panel.width - 2*INNER_PADDING, left_panel.height - 2*INNER_PADDING
+        left_panel.x + INNER_PADDING,
+        left_panel.y + INNER_PADDING,
+        left_panel.width - 2 * INNER_PADDING,
+        left_panel.height - 2 * INNER_PADDING
     )
     pygame.draw.rect(screen, (200, 200, 200), left_inner)
 
     # Tombol kembali
+    btn_size = int(WINDOW_WIDTH * 0.05)
     back_button = Button(
         left_panel.x + INNER_PADDING,
         left_panel.y + INNER_PADDING,
-        120, 120, "<"
+        btn_size,
+        btn_size,
+        "<"
     )
     back_button.draw(screen, font)
 
-    # Area maze
+    # Maze container
     maze_container = pygame.Rect(
         right_panel.x + INNER_PADDING,
         right_panel.y + INNER_PADDING,
         right_panel.width - 2 * INNER_PADDING,
-        right_panel.height - 20 * INNER_PADDING
+        int(right_panel.height * 0.85)
     )
     pygame.draw.rect(screen, (250, 250, 250), maze_container)
 
-    # Area tombol bawah
+    # Tombol bawah container
     button_container = pygame.Rect(
         right_panel.x + INNER_PADDING,
         maze_container.bottom + INNER_PADDING,
         right_panel.width - 2 * INNER_PADDING,
-        right_panel.height - maze_container.height - 3 * INNER_PADDING
+        right_panel.bottom - maze_container.bottom - INNER_PADDING
     )
     pygame.draw.rect(screen, (220, 220, 220), button_container)
 
-    # Tombol bawah
-    btn_margin, btn_w, btn_h = 30, 220, 90
+    # Tombol bawah (responsif)
+    btn_w = int(button_container.width * 0.15)
+    btn_h = int(button_container.height * 0.6)
+    btn_margin = int(button_container.width * 0.02)
     x_start = button_container.x + btn_margin
     y_center = button_container.centery - btn_h // 2
 
@@ -165,7 +179,7 @@ def draw(screen, events, data):
     for btn in [restart_btn, auto_btn, prev_btn, next_btn]:
         btn.draw(screen, font)
 
-    # Tampilkan maze dari file pilihan user
+    # Muat maze sesuai pilihan
     maze_file = data.get("maze_file", "./mazes/maze_2.txt")
     grid, rows, cols, start, exits = load_maze(maze_file)
     draw_maze(screen, maze_container, grid, start, exits)
@@ -173,12 +187,9 @@ def draw(screen, events, data):
     # Event handling
     for e in events:
         if back_button.is_clicked(e):
-            return "select_maze", None  # balik ke halaman pilih maze
-    
+            return "select_maze", None  # kembali ke halaman pilih maze
         if auto_btn.is_clicked(e):
-            path, steps = bfs_solve(grid, start)  # atau dfs_solve
-            print(f"Langkah: {steps}")
+            path, steps = bfs_solve(grid, start)
+            print(f"Langkah BFS: {steps}")
 
-
-    # Kalau tidak berpindah halaman
     return None, None
