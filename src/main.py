@@ -2,7 +2,7 @@ import pygame
 from gui import main_menu, about_page, select_maze, visualizer
 
 pygame.init()
-screen = pygame.display.set_mode((2500, 1500))
+screen = pygame.display.set_mode((800, 800))
 pygame.display.set_caption("Maze Solver")
 clock = pygame.time.Clock()
 

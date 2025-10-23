@@ -1,5 +1,7 @@
 import pygame
 import os
+from core.solver import bfs_solve, dfs_solve
+
 
 # ----------------------------------------------------------
 # Fungsi membaca maze
@@ -172,6 +174,11 @@ def draw(screen, events, data):
     for e in events:
         if back_button.is_clicked(e):
             return "select_maze", None  # balik ke halaman pilih maze
+    
+        if auto_btn.is_clicked(e):
+            path, steps = bfs_solve(grid, start)  # atau dfs_solve
+            print(f"Langkah: {steps}")
+
 
     # Kalau tidak berpindah halaman
     return None, None
