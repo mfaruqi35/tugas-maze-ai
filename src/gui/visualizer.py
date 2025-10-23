@@ -1,5 +1,6 @@
 import pygame
 import os
+from collections import deque
 from core.solver import bfs_solve, dfs_solve
 
 
@@ -15,7 +16,6 @@ def load_maze(filename):
     start_r, start_c = map(int, lines[1 + rows].split())
     start = (start_r - 1, start_c - 1)
 
-    # cari cell yang merupakan exit (0 di pinggir)
     exits = []
     for r in range(rows):
         for c in range(cols):
@@ -73,32 +73,26 @@ def draw_maze(surface, maze_rect, grid, start, exits, visited=None, path=None):
             rect = pygame.Rect(offset_x + c * cell_size, offset_y + r * cell_size, cell_size, cell_size)
             pygame.draw.rect(surface, color, rect)
 
-            # sel visited
             if visited and (r, c) in visited:
                 pygame.draw.rect(surface, (200, 200, 100), rect)
-            # path hasil
             if path and (r, c) in path:
                 pygame.draw.rect(surface, (255, 180, 50), rect)
 
             pygame.draw.rect(surface, (180, 180, 180), rect, 1)
 
-    # start
     sx, sy = start[1], start[0]
     srect = pygame.Rect(offset_x + sx * cell_size, offset_y + sy * cell_size, cell_size, cell_size)
     pygame.draw.rect(surface, (50, 100, 255), srect)
 
-    # exits
     for (er, ec) in exits:
         erect = pygame.Rect(offset_x + ec * cell_size, offset_y + er * cell_size, cell_size, cell_size)
         pygame.draw.rect(surface, (0, 200, 0), erect)
 
 
 # ----------------------------------------------------------
-# Fungsi BFS/DFS yang bisa memberi urutan visited
+# BFS dan DFS untuk animasi (mengembalikan urutan langkah)
 # ----------------------------------------------------------
 def bfs_search_steps(grid, start):
-    from collections import deque
-
     n, m = len(grid), len(grid[0])
     sr, sc = start
     visited = [[False]*m for _ in range(n)]
@@ -111,74 +105,62 @@ def bfs_search_steps(grid, start):
     while q:
         r, c = q.popleft()
         steps.append((r, c))
-
-        # kalau sampai di pinggir dan cell 0 -> goal ditemukan
         if (r == 0 or c == 0 or r == n-1 or c == m-1) and grid[r][c] == 0:
-            # bangun path aman
             path = []
             cur = (r, c)
             while cur is not None:
                 path.append(cur)
-                pr = parent[cur[0]][cur[1]]
-                if pr is None:
-                    break
-                cur = pr
+                cur = parent[cur[0]][cur[1]]
             path.reverse()
             return steps, path
-
-        # lanjut eksplorasi tetangga
         for dr, dc in dirs:
             nr, nc = r + dr, c + dc
             if 0 <= nr < n and 0 <= nc < m and grid[nr][nc] == 0 and not visited[nr][nc]:
                 visited[nr][nc] = True
                 parent[nr][nc] = (r, c)
                 q.append((nr, nc))
-
-    # kalau tidak ada jalan keluar
     return steps, []
 
-# ----------------------------------------------------------
-# Fungsi DFS yang memberi urutan visited (untuk animasi)
-# ----------------------------------------------------------
+
 def dfs_search_steps(grid, start):
+    """
+    DFS iteratif (pakai stack) — menghasilkan urutan visited & path final.
+    """
     n, m = len(grid), len(grid[0])
     sr, sc = start
-    visited = [[False]*m for _ in range(n)]
-    parent = [[None]*m for _ in range(n)]
+    visited = [[False] * m for _ in range(n)]
+    parent = [[None] * m for _ in range(n)]
     steps = []
-    dirs = [(-1,0),(1,0),(0,-1),(0,1)]
     path = []
-    found = [False]  # list agar bisa diubah di dalam nested function
 
-    def dfs(r, c):
-        if not (0 <= r < n and 0 <= c < m):
-            return
-        if grid[r][c] == -1 or visited[r][c] or found[0]:
-            return
+    # Stack (LIFO)
+    stack = [(sr, sc)]
+    dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
+    while stack:
+        r, c = stack.pop()
+        if visited[r][c]:
+            continue
         visited[r][c] = True
         steps.append((r, c))
 
         # cek goal (0 di pinggir)
-        if (r == 0 or c == 0 or r == n-1 or c == m-1) and grid[r][c] == 0:
-            found[0] = True
-            # bangun path
+        if (r == 0 or c == 0 or r == n - 1 or c == m - 1) and grid[r][c] == 0:
             cur = (r, c)
             while cur is not None:
                 path.append(cur)
                 cur = parent[cur[0]][cur[1]]
             path.reverse()
-            return
+            return steps, path
 
-        for dr, dc in dirs:
+        # tambahkan tetangga (DFS = urutan terbalik biar tampil sama arah)
+        for dr, dc in reversed(dirs):
             nr, nc = r + dr, c + dc
-            if 0 <= nr < n and 0 <= nc < m and not visited[nr][nc] and grid[nr][nc] == 0:
+            if 0 <= nr < n and 0 <= nc < m and grid[nr][nc] == 0 and not visited[nr][nc]:
                 parent[nr][nc] = (r, c)
-                dfs(nr, nc)
+                stack.append((nr, nc))
 
-    dfs(sr, sc)
     return steps, path
-
 
 # ----------------------------------------------------------
 # Fungsi utama: draw()
@@ -189,18 +171,15 @@ def draw(screen, events, data):
     WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
     MARGIN, PANEL_GAP, INNER_PADDING = int(WINDOW_WIDTH * 0.03), int(WINDOW_WIDTH * 0.015), int(WINDOW_WIDTH * 0.005)
 
-    # layout
     frame_rect = pygame.Rect(MARGIN, MARGIN, WINDOW_WIDTH - 2*MARGIN, WINDOW_HEIGHT - 2*MARGIN)
     left_width = int(frame_rect.width * 0.3)
     right_width = frame_rect.width - left_width - PANEL_GAP
     left_panel = pygame.Rect(frame_rect.x, frame_rect.y, left_width, frame_rect.height)
     right_panel = pygame.Rect(left_panel.right + PANEL_GAP, frame_rect.y, right_width, frame_rect.height)
 
-    # panel background
     pygame.draw.rect(screen, (100, 100, 100), left_panel)
     pygame.draw.rect(screen, (0, 0, 0), right_panel)
 
-    # tombol
     btn_size = int(WINDOW_WIDTH * 0.05)
     back_button = Button(left_panel.x + INNER_PADDING, left_panel.y + INNER_PADDING, btn_size, btn_size, "<")
     algo_w = left_panel.width - 2*INNER_PADDING
@@ -212,42 +191,41 @@ def draw(screen, events, data):
     bfs_button.active = (algo_mode == "BFS")
     dfs_button.active = (algo_mode == "DFS")
 
-    maze_container = pygame.Rect(
-        right_panel.x + INNER_PADDING,
-        right_panel.y + INNER_PADDING,
-        right_panel.width - 2 * INNER_PADDING,
-        int(right_panel.height * 0.85)
-    )
-    button_container = pygame.Rect(
-        right_panel.x + INNER_PADDING,
-        maze_container.bottom + INNER_PADDING,
-        right_panel.width - 2 * INNER_PADDING,
-        right_panel.bottom - maze_container.bottom - INNER_PADDING
-    )
+    maze_container = pygame.Rect(right_panel.x + INNER_PADDING, right_panel.y + INNER_PADDING,
+                                 right_panel.width - 2 * INNER_PADDING, int(right_panel.height * 0.85))
+    button_container = pygame.Rect(right_panel.x + INNER_PADDING, maze_container.bottom + INNER_PADDING,
+                                   right_panel.width - 2 * INNER_PADDING, right_panel.bottom - maze_container.bottom - INNER_PADDING)
 
     btn_w = int(button_container.width * 0.15)
     btn_h = int(button_container.height * 0.6)
     btn_margin = int(button_container.width * 0.02)
     x_start = button_container.x + btn_margin
     y_center = button_container.centery - btn_h // 2
-    auto_btn = Button(x_start, y_center, btn_w, btn_h, "AUTO")
 
-    # gambar tombol
-    for btn in [back_button, bfs_button, dfs_button, auto_btn]:
+    auto_btn = Button(x_start, y_center, btn_w, btn_h, "AUTO")
+    restart_btn = Button(x_start + btn_w + btn_margin, y_center, btn_w, btn_h, "RESTART")
+    prev_btn = Button(button_container.right - (btn_w * 2 + btn_margin * 2), y_center, btn_w, btn_h, "< PREV")
+    next_btn = Button(button_container.right - (btn_w + btn_margin), y_center, btn_w, btn_h, "NEXT >")
+
+    for btn in [back_button, bfs_button, dfs_button, auto_btn, restart_btn, prev_btn, next_btn]:
         btn.draw(screen, font)
 
-    # muat maze
     maze_file = data.get("maze_file", "./mazes/maze_2.txt")
     grid, rows, cols, start, exits = load_maze(maze_file)
 
-    # ambil state
-    animating = data.get("animating", False)
-    visited = data.get("visited", [])
-    path = data.get("path", [])
+    # pastikan state ada
+    data.setdefault("visited", [])
+    data.setdefault("path", [])
+    data.setdefault("steps", [])
+    data.setdefault("path_final", [])
+    data.setdefault("step_index", 0)
+
+    visited = data["visited"]
+    path = data["path"]
 
     draw_maze(screen, maze_container, grid, start, exits, visited, path)
 
-    # handle event
+    # handle event tombol
     for e in events:
         if back_button.is_clicked(e):
             return "select_maze", None
@@ -255,32 +233,42 @@ def draw(screen, events, data):
             data["algo"] = "BFS"
         if dfs_button.is_clicked(e):
             data["algo"] = "DFS"
-        if auto_btn.is_clicked(e) and not animating:
+        if restart_btn.is_clicked(e):
+            data.update({"visited": [], "path": [], "steps": [], "path_final": [], "step_index": 0})
+        if auto_btn.is_clicked(e):
             data["animating"] = True
             return None, data
+        if next_btn.is_clicked(e):
+            algo = data.get("algo", "BFS")
+            if not data["steps"]:
+                steps, path_final = bfs_search_steps(grid, start) if algo == "BFS" else dfs_search_steps(grid, start)
+                data["steps"] = steps
+                data["path_final"] = path_final
+            if data["step_index"] < len(data["steps"]):
+                data["step_index"] += 1
+                data["visited"] = data["steps"][:data["step_index"]]
+                if data["visited"][-1] == data["path_final"][-1]:
+                    data["path"] = data["path_final"]
+        if prev_btn.is_clicked(e):
+            if data["step_index"] > 0:
+                data["step_index"] -= 1
+                data["visited"] = data["steps"][:data["step_index"]]
+                data["path"] = []
 
-    # animasi BFS step-by-step
+    # auto animasi
     if data.get("animating", False):
         algo = data.get("algo", "BFS")
-        if algo == "BFS":
-            steps, path = bfs_search_steps(grid, start)
-        else:
-            steps, path = dfs_search_steps(grid, start)  # dfs bisa dibuat versi serupa
-
+        steps, path = bfs_search_steps(grid, start) if algo == "BFS" else dfs_search_steps(grid, start)
         visited = []
         for pos in steps:
             visited.append(pos)
             draw_maze(screen, maze_container, grid, start, exits, visited)
             pygame.display.flip()
-            pygame.time.wait(80)
-        # setelah goal ketemu
+            pygame.time.wait(60)
         for i in range(1, len(path) + 1):
             draw_maze(screen, maze_container, grid, start, exits, visited, path[:i])
             pygame.display.flip()
-            pygame.time.wait(100)
-
-        data["animating"] = False
-        data["visited"] = visited
-        data["path"] = path
+            pygame.time.wait(80)
+        data.update({"animating": False, "visited": visited, "path": path})
 
     return None, data
