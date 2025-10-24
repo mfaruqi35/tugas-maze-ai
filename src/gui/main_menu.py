@@ -6,16 +6,16 @@ def draw(screen, events):
     btn_font = pygame.font.Font("assets/fonts/Eurostar Black/Eurostar Black.ttf", 36)
 
     # Warna dasar
-    start_color = (180, 220, 180)
-    quit_color = (220, 180, 180)
-    about_color = (180, 180, 250)
+    start_color = (12, 236, 13)
+    quit_color = (233, 12, 9)
+    about_color = (241,220,9)   
     border_color = (50, 50, 50)
     border_thickness = 4
 
     # Warna hover (sedikit lebih terang)
-    hover_start = (200, 240, 200)
-    hover_quit = (240, 200, 200)
-    hover_about = (200, 200, 255)
+    hover_start = (0, 255, 1)
+    hover_quit = (250, 11, 7)
+    hover_about = (255, 232, 0)
     hover_border = (80, 80, 80)
 
     # Judul

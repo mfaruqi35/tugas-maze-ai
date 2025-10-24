@@ -19,7 +19,7 @@ while running:
         if e.type == pygame.QUIT:
             running = False
 
-    screen.fill((240, 240, 240))
+    screen.fill((25, 128, 229))
 
     # Render page berdasarkan state
     if current_page == "main_menu":

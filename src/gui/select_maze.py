@@ -8,16 +8,16 @@ def draw(screen, events):
     # screen.blit(title, (width//2 - title.get_width()//2, 100))
 
     # Warna dasar
-    maze1_color = (180, 220, 180)
-    maze2_color = (220, 180, 180)
-    back_color = (180, 180, 250)
+    maze1_color = (241,220,9)
+    maze2_color = (241,220,9)
+    back_color = (233, 12, 9)
     border_color = (50, 50, 50)
     border_thickness = 4
 
     # Warna hover (sedikit lebih terang)
-    hover_maze1 = (200, 240, 200)
-    hover_maze2 = (240, 200, 200)
-    hover_back = (200, 200, 255)
+    hover_maze1 = (255, 232, 0)
+    hover_maze2 = (255, 232, 0)
+    hover_back = (250, 11, 7)
     hover_border = (80, 80, 80)
 
     title_surf = font.render("PILIH MAZE", True, (20, 20, 20))

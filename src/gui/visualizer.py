@@ -28,8 +28,8 @@ def load_maze(filename):
 # ----------------------------------------------------------
 class Button:
     def __init__(self, x, y, w, h, text,
-                 bg_color=(240,240,240), hover_color=(200,200,200),
-                 active_color=(160,160,160),
+                 bg_color=(241,220,9), hover_color=(203,186,8),
+                 active_color=(203,186,8),
                  text_color=(0,0,0), border_color=(0,0,0)):
         self.rect = pygame.Rect(x, y, w, h)
         self.text = text
@@ -66,24 +66,36 @@ def draw_maze(surface, maze_rect, grid, start, exits, visited=None, path=None, f
     offset_x = maze_rect.x + (maze_rect.width - cols * cell_size) // 2
     offset_y = maze_rect.y + (maze_rect.height - rows * cell_size) // 2
 
+    wall_texture = pygame.image.load("assets/images/walls.png").convert()
+    wall_texture = pygame.transform.smoothscale(wall_texture, (cell_size, cell_size))
+
     for r in range(rows):
         for c in range(cols):
             val = grid[r][c]
-            color = (40, 40, 40) if val == -1 else (230, 230, 230)
             rect = pygame.Rect(offset_x + c * cell_size, offset_y + r * cell_size, cell_size, cell_size)
-            pygame.draw.rect(surface, color, rect)
+
+            if val == -1:
+                surface.blit(wall_texture, rect)
+            else:
+                pygame.draw.rect(surface, (230, 230, 230), rect)
+                pygame.draw.rect(surface, (180, 180, 180), rect, 1)
+            # color = (40, 40, 40) if val == -1 else (230, 230, 230)
+            # rect = pygame.Rect(offset_x + c * cell_size, offset_y + r * cell_size, cell_size, cell_size)
+            # pygame.draw.rect(surface, color, rect)
 
             # warna sel frontier
             if frontier and (r, c) in frontier:
                 pygame.draw.rect(surface, (100, 200, 255), rect)
+                pygame.draw.rect(surface, (180, 180, 180), rect, 1)
             # warna sel visited
             if visited and (r, c) in visited:
                 pygame.draw.rect(surface, (200, 200, 100), rect)
+                pygame.draw.rect(surface, (180, 180, 180), rect, 1)
             # warna path akhir
             if path and (r, c) in path:
                 pygame.draw.rect(surface, (255, 180, 50), rect)
+                pygame.draw.rect(surface, (180, 180, 180), rect, 1)
 
-            pygame.draw.rect(surface, (180, 180, 180), rect, 1)
 
     # start
     sx, sy = start[1], start[0]
@@ -188,8 +200,8 @@ def draw(screen, events, data):
     back_button = Button(left_panel.x + INNER_PADDING, left_panel.y + INNER_PADDING, btn_size, btn_size, "<")
     algo_w = left_panel.width - 2*INNER_PADDING
     algo_h = int(WINDOW_HEIGHT * 0.08)
-    bfs_button = Button(left_panel.x + INNER_PADDING, back_button.rect.bottom + 40, algo_w, algo_h, "BFS")
-    dfs_button = Button(left_panel.x + INNER_PADDING, bfs_button.rect.bottom + 20, algo_w, algo_h, "DFS")
+    bfs_button = Button(left_panel.x + INNER_PADDING, back_button.rect.bottom + 40, algo_w, algo_h, "BFS", bg_color=(0, 0, 0), hover_color=(255,255,255), active_color=(255,255,255))
+    dfs_button = Button(left_panel.x + INNER_PADDING, bfs_button.rect.bottom + 20, algo_w, algo_h, "DFS", bg_color=(0, 0, 0), hover_color=(255,255,255), active_color=(255,255,255))
 
     algo_mode = data.get("algo", "BFS")
     bfs_button.active = (algo_mode == "BFS")
@@ -209,8 +221,8 @@ def draw(screen, events, data):
 
     auto_btn = Button(x_start, y_center, btn_w, btn_h, "AUTO")
     restart_btn = Button(x_start + btn_w + btn_margin, y_center, btn_w + 20, btn_h, "RESTART")
-    prev_btn = Button(button_container.right - (btn_w * 2 + btn_margin * 2), y_center, btn_w, btn_h, "< PREV")
-    next_btn = Button(button_container.right - (btn_w + btn_margin), y_center, btn_w, btn_h, "NEXT >")
+    prev_btn = Button(button_container.right - (btn_w * 2 + btn_margin * 2), y_center, btn_w, btn_h, "< PREV", bg_color=(25, 128, 229), hover_color=(20, 112, 203), active_color=(20, 112, 203), text_color=(255,255,255))
+    next_btn = Button(button_container.right - (btn_w + btn_margin), y_center, btn_w, btn_h, "NEXT >", bg_color=(25, 128, 229), hover_color=(20, 112, 203), active_color=(20, 112, 203), text_color=(255,255,255))
 
     for btn in [back_button, bfs_button, dfs_button, auto_btn, restart_btn, prev_btn, next_btn]:
         btn.draw(screen, font)
