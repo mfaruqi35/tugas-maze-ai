@@ -231,15 +231,24 @@ def draw(screen, events, data):
     if data["frontiers"] and data["step_index"] < len(data["frontiers"]):
         frontier = data["frontiers"][data["step_index"]]
 
-    # tampilkan info status
-    step_goal = len(data.get("path_final", []))
-    step_total = len(data.get("steps", []))
+    # Tampilkan info status
+    current_step = data.get("step_index", 0)
+    goal_reached = False
+    if data.get("path_final"):
+        # kalau posisi terakhir sudah sampai ke goal (elemen terakhir path_final)
+        if current_step > 0 and data["visited"] and data["visited"][-1] == data["path_final"][-1]:
+            goal_reached = True
+
+    step_goal = len(data["path_final"]) if goal_reached else 0
+    step_total = current_step
+
     screen.blit(small_font.render(f"Status: {data['status']}", True, (255,255,255)),
                 (left_panel.x + INNER_PADDING, dfs_button.rect.bottom + 80))
     screen.blit(small_font.render(f"Langkah ke goal: {step_goal}", True, (255,255,255)),
                 (left_panel.x + INNER_PADDING, dfs_button.rect.bottom + 120))
     screen.blit(small_font.render(f"Total dikunjungi: {step_total}", True, (255,255,255)),
                 (left_panel.x + INNER_PADDING, dfs_button.rect.bottom + 160))
+
 
     # gambar maze
     draw_maze(screen, maze_container, grid, start, exits, visited, path, frontier)
@@ -284,20 +293,40 @@ def draw(screen, events, data):
     # auto animasi
     if data.get("animating", False):
         algo = data.get("algo", "BFS")
+
+        # Jalankan pencarian penuh dulu (biar kita tahu hasil akhirnya)
         if algo == "BFS":
             steps, path, fronts = bfs_search_steps(grid, start)
         else:
             steps, path, fronts = dfs_search_steps(grid, start)
+
+        # Langsung tampilkan hasil langkah di panel kiri (tanpa nunggu animasi)
+        data.update({
+            "steps": steps,
+            "path_final": path,
+            "frontiers": fronts,
+            "visited": steps,   # biar jumlah total langkah muncul langsung
+            "path": path,       # biar langkah ke goal muncul
+            "step_index": len(steps),
+            "status": "Running"
+        })
+
+        # Tetap jalankan animasi visualnya
         for i in range(len(steps)):
             draw_maze(screen, maze_container, grid, start, exits, steps[:i+1], None, fronts[i])
             pygame.display.flip()
             pygame.time.wait(80)
+
         for i in range(1, len(path)+1):
             draw_maze(screen, maze_container, grid, start, exits, steps, path[:i])
             pygame.display.flip()
             pygame.time.wait(100)
-        data.update({"animating": False, "visited": steps, "path": path,
-                     "steps": steps, "path_final": path, "frontiers": fronts,
-                     "status": "Finished"})
+
+        # Setelah animasi selesai
+        data.update({
+            "animating": False,
+            "status": "Finished"
+        })
+
 
     return None, data
