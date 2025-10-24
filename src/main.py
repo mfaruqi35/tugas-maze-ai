@@ -9,6 +9,19 @@ screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Maze Solver")
 clock = pygame.time.Clock()
 
+# =======================================================
+# 🖼️  LOAD BACKGROUND IMAGE
+# =======================================================
+try:
+    background = pygame.image.load("assets/images/background.jpg").convert()
+    background = pygame.transform.smoothscale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
+except Exception as e:
+    print("⚠️ Tidak bisa memuat background, gunakan warna solid:", e)
+    background = None
+
+# =======================================================
+# Main Loop
+# =======================================================
 current_page = "main_menu"
 page_data = {}
 running = True
@@ -19,9 +32,17 @@ while running:
         if e.type == pygame.QUIT:
             running = False
 
-    screen.fill((25, 128, 229))
+    # =======================================================
+    # 🎨 DRAW BACKGROUND
+    # =======================================================
+    if background:
+        screen.blit(background, (0, 0))
+    else:
+        screen.fill((25, 128, 229))  # fallback warna biru
 
-    # Render page berdasarkan state
+    # =======================================================
+    # 📄 RENDER HALAMAN BERDASARKAN STATE
+    # =======================================================
     if current_page == "main_menu":
         next_page, data = main_menu.draw(screen, events)
     elif current_page == "about_page":
@@ -39,7 +60,9 @@ while running:
     else:
         next_page, data = None, None
 
-    # Pindah halaman
+    # =======================================================
+    # 🔄 GANTI HALAMAN
+    # =======================================================
     if next_page:
         if next_page == "exit":
             running = False

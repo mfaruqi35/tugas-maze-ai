@@ -28,9 +28,9 @@ def load_maze(filename):
 # ----------------------------------------------------------
 class Button:
     def __init__(self, x, y, w, h, text,
-                 bg_color=(241,220,9), hover_color=(203,186,8),
-                 active_color=(203,186,8),
-                 text_color=(0,0,0), border_color=(0,0,0)):
+                 bg_color=(255, 235, 34), hover_color=(193, 179, 36),
+                 active_color=(193, 179, 36),
+                 text_color=(0,0,0), border_color=(70,70,70)):
         self.rect = pygame.Rect(x, y, w, h)
         self.text = text
         self.bg_color = bg_color
@@ -47,8 +47,8 @@ class Button:
             self.hover_color if self.rect.collidepoint(mouse_pos) else
             self.bg_color
         )
-        pygame.draw.rect(surface, color, self.rect, border_radius=8)
-        pygame.draw.rect(surface, self.border_color, self.rect, width=2, border_radius=8)
+        pygame.draw.rect(surface, color, self.rect, border_radius=10)
+        pygame.draw.rect(surface, self.border_color, self.rect, width=3, border_radius=10)
         text_surf = font.render(self.text, True, self.text_color)
         surface.blit(text_surf, text_surf.get_rect(center=self.rect.center))
 
@@ -77,11 +77,8 @@ def draw_maze(surface, maze_rect, grid, start, exits, visited=None, path=None, f
             if val == -1:
                 surface.blit(wall_texture, rect)
             else:
-                pygame.draw.rect(surface, (230, 230, 230), rect)
+                pygame.draw.rect(surface, (255, 255, 255), rect)
                 pygame.draw.rect(surface, (180, 180, 180), rect, 1)
-            # color = (40, 40, 40) if val == -1 else (230, 230, 230)
-            # rect = pygame.Rect(offset_x + c * cell_size, offset_y + r * cell_size, cell_size, cell_size)
-            # pygame.draw.rect(surface, color, rect)
 
             # warna sel frontier
             if frontier and (r, c) in frontier:
@@ -182,26 +179,26 @@ def draw(screen, events, data):
     pygame.font.init()
     font = pygame.font.Font("assets/fonts/Eurostar Black/Eurostar Black.ttf", int(screen.get_height() * 0.02) + 10)
     # btn_font = pygame.font.Font("assets/font/")
-    small_font = pygame.font.Font("assets/fonts/Eurostar Regular/Eurostar Regular.ttf", 24)
+    small_font = pygame.font.Font("assets/fonts/Eurostar Regular/Eurostar Regular.ttf", 20)
     WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
-    MARGIN, PANEL_GAP, INNER_PADDING = int(WINDOW_WIDTH * 0.03), int(WINDOW_WIDTH * 0.015), int(WINDOW_WIDTH * 0.005)
+    MARGIN, INNER_PADDING = int(WINDOW_WIDTH * 0.03), int(WINDOW_WIDTH * 0.005)
 
-    frame_rect = pygame.Rect(MARGIN, MARGIN, WINDOW_WIDTH - 2*MARGIN, WINDOW_HEIGHT - 2*MARGIN)
+    frame_rect = pygame.Rect(MARGIN + 2, MARGIN, WINDOW_WIDTH - 2*MARGIN, WINDOW_HEIGHT - 2*MARGIN)
     left_width = int(frame_rect.width * 0.3)
-    right_width = frame_rect.width - left_width - PANEL_GAP
+    right_width = frame_rect.width - left_width - 10
     left_panel = pygame.Rect(frame_rect.x, frame_rect.y, left_width, frame_rect.height)
-    right_panel = pygame.Rect(left_panel.right + PANEL_GAP, frame_rect.y, right_width, frame_rect.height)
+    right_panel = pygame.Rect(left_panel.right, frame_rect.y, right_width, frame_rect.height)
 
     pygame.draw.rect(screen, (100, 100, 100), left_panel)
     pygame.draw.rect(screen, (255, 255, 255), right_panel)
 
     # tombol
     btn_size = int(WINDOW_WIDTH * 0.05)
-    back_button = Button(left_panel.x + INNER_PADDING, left_panel.y + INNER_PADDING, btn_size, btn_size, "<")
-    algo_w = left_panel.width - 2*INNER_PADDING
+    back_button = Button(left_panel.x + INNER_PADDING, left_panel.y + INNER_PADDING, btn_size, btn_size, "<", bg_color=(250, 11, 7), hover_color=(212, 10, 7), active_color=(212, 10, 7))
+    algo_w = left_panel.width // 2.2
     algo_h = int(WINDOW_HEIGHT * 0.08)
-    bfs_button = Button(left_panel.x + INNER_PADDING, back_button.rect.bottom + 40, algo_w, algo_h, "BFS", bg_color=(0, 0, 0), hover_color=(255,255,255), active_color=(255,255,255))
-    dfs_button = Button(left_panel.x + INNER_PADDING, bfs_button.rect.bottom + 20, algo_w, algo_h, "DFS", bg_color=(0, 0, 0), hover_color=(255,255,255), active_color=(255,255,255))
+    bfs_button = Button(left_panel.x + INNER_PADDING + 5, back_button.rect.bottom + 40, algo_w, algo_h, "BFS")
+    dfs_button = Button(left_panel.x * 5.35 + INNER_PADDING, back_button.rect.bottom + 40, algo_w, algo_h, "DFS")
 
     algo_mode = data.get("algo", "BFS")
     bfs_button.active = (algo_mode == "BFS")
@@ -213,16 +210,16 @@ def draw(screen, events, data):
     button_container = pygame.Rect(right_panel.x + INNER_PADDING, maze_container.bottom + INNER_PADDING,
                                    right_panel.width - 2 * INNER_PADDING, right_panel.bottom - maze_container.bottom - INNER_PADDING)
 
-    btn_w = int(button_container.width * 0.15)
-    btn_h = int(button_container.height * 0.6)
+    btn_w = int(button_container.width * 0.18)
+    btn_h = int(button_container.height * 0.75)
     btn_margin = int(button_container.width * 0.02)
     x_start = button_container.x + btn_margin
     y_center = button_container.centery - btn_h // 2
 
     auto_btn = Button(x_start, y_center, btn_w, btn_h, "AUTO")
     restart_btn = Button(x_start + btn_w + btn_margin, y_center, btn_w + 20, btn_h, "RESTART")
-    prev_btn = Button(button_container.right - (btn_w * 2 + btn_margin * 2), y_center, btn_w, btn_h, "< PREV", bg_color=(25, 128, 229), hover_color=(20, 112, 203), active_color=(20, 112, 203), text_color=(255,255,255))
-    next_btn = Button(button_container.right - (btn_w + btn_margin), y_center, btn_w, btn_h, "NEXT >", bg_color=(25, 128, 229), hover_color=(20, 112, 203), active_color=(20, 112, 203), text_color=(255,255,255))
+    prev_btn = Button(button_container.right - (btn_w * 2 + btn_margin * 2), y_center, btn_w, btn_h, "< PREV")
+    next_btn = Button(button_container.right - (btn_w + btn_margin), y_center, btn_w, btn_h, "NEXT >")
 
     for btn in [back_button, bfs_button, dfs_button, auto_btn, restart_btn, prev_btn, next_btn]:
         btn.draw(screen, font)
@@ -256,11 +253,11 @@ def draw(screen, events, data):
     step_total = current_step
 
     screen.blit(small_font.render(f"Status: {data['status']}", True, (255,255,255)),
-                (left_panel.x + INNER_PADDING, dfs_button.rect.bottom + 80))
+                (left_panel.x + INNER_PADDING + 10, dfs_button.rect.bottom + 80))
     screen.blit(small_font.render(f"Langkah ke goal: {step_goal}", True, (255,255,255)),
-                (left_panel.x + INNER_PADDING, dfs_button.rect.bottom + 120))
+                (left_panel.x + INNER_PADDING + 10, dfs_button.rect.bottom + 120))
     screen.blit(small_font.render(f"Total dikunjungi: {step_total}", True, (255,255,255)),
-                (left_panel.x + INNER_PADDING, dfs_button.rect.bottom + 160))
+                (left_panel.x + INNER_PADDING + 10, dfs_button.rect.bottom + 160))
 
 
     # gambar maze

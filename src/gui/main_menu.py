@@ -6,17 +6,17 @@ def draw(screen, events):
     btn_font = pygame.font.Font("assets/fonts/Eurostar Black/Eurostar Black.ttf", 36)
 
     # Warna dasar
-    start_color = (12, 236, 13)
-    quit_color = (233, 12, 9)
-    about_color = (241,220,9)   
-    border_color = (50, 50, 50)
-    border_thickness = 4
+    start_color = (0, 255, 1)
+    quit_color = (250, 11, 7)
+    about_color = (255, 235, 34)   
+    border_color = (70, 70, 70)
+    border_thickness = 3
 
     # Warna hover (sedikit lebih terang)
-    hover_start = (0, 255, 1)
-    hover_quit = (250, 11, 7)
-    hover_about = (255, 232, 0)
-    hover_border = (80, 80, 80)
+    hover_start = (14, 190, 15)
+    hover_quit = (212, 10, 7)
+    hover_about = (193, 179, 36)
+    hover_border = (70, 70, 70)
 
     # Judul
     title_surf = font.render("MAZE SOLVER", True, (20, 20, 20))
