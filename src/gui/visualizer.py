@@ -168,8 +168,9 @@ def dfs_search_steps(grid, start):
 # ----------------------------------------------------------
 def draw(screen, events, data):
     pygame.font.init()
-    font = pygame.font.SysFont("Arial", int(screen.get_height() * 0.02) + 20, bold=True)
-    small_font = pygame.font.SysFont("Arial", 24)
+    font = pygame.font.Font("assets/fonts/Eurostar Black/Eurostar Black.ttf", int(screen.get_height() * 0.02) + 10)
+    # btn_font = pygame.font.Font("assets/font/")
+    small_font = pygame.font.Font("assets/fonts/Eurostar Regular/Eurostar Regular.ttf", 24)
     WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
     MARGIN, PANEL_GAP, INNER_PADDING = int(WINDOW_WIDTH * 0.03), int(WINDOW_WIDTH * 0.015), int(WINDOW_WIDTH * 0.005)
 
@@ -180,7 +181,7 @@ def draw(screen, events, data):
     right_panel = pygame.Rect(left_panel.right + PANEL_GAP, frame_rect.y, right_width, frame_rect.height)
 
     pygame.draw.rect(screen, (100, 100, 100), left_panel)
-    pygame.draw.rect(screen, (0, 0, 0), right_panel)
+    pygame.draw.rect(screen, (255, 255, 255), right_panel)
 
     # tombol
     btn_size = int(WINDOW_WIDTH * 0.05)
@@ -207,7 +208,7 @@ def draw(screen, events, data):
     y_center = button_container.centery - btn_h // 2
 
     auto_btn = Button(x_start, y_center, btn_w, btn_h, "AUTO")
-    restart_btn = Button(x_start + btn_w + btn_margin, y_center, btn_w, btn_h, "RESTART")
+    restart_btn = Button(x_start + btn_w + btn_margin, y_center, btn_w + 20, btn_h, "RESTART")
     prev_btn = Button(button_container.right - (btn_w * 2 + btn_margin * 2), y_center, btn_w, btn_h, "< PREV")
     next_btn = Button(button_container.right - (btn_w + btn_margin), y_center, btn_w, btn_h, "NEXT >")
 

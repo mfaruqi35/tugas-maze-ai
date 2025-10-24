@@ -1,8 +1,8 @@
 import pygame
 
 def draw(screen, events):
-    font = pygame.font.SysFont("Arial", 48, bold=True)
-    btn_font = pygame.font.SysFont("Arial", 36)
+    font = pygame.font.Font("assets/fonts/Eurostar Black/Eurostar Black.ttf", 36)
+    btn_font = pygame.font.Font("assets/fonts/Eurostar Black/Eurostar Black.ttf", 36)
     width, height = screen.get_size()
     title = font.render("Pilih Maze", True, (0,0,0))
     screen.blit(title, (width//2 - title.get_width()//2, 100))
@@ -12,6 +12,9 @@ def draw(screen, events):
     maze2_btn = pygame.Rect(width//2 + 50, height//2 - 60, 250, 80)
     back_btn  = pygame.Rect(30, 30, 150, 50)
 
+    mouse_pos = pygame.mouse.get_pos()
+
+    # def draw_button(rect, base_color, hover_color, text, border_color, hover_border)
     pygame.draw.rect(screen, (180, 220, 180), maze1_btn, border_radius=8)
     pygame.draw.rect(screen, (180, 180, 250), maze2_btn, border_radius=8)
     pygame.draw.rect(screen, (200, 200, 200), back_btn, border_radius=8)

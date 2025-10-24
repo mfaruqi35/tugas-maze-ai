@@ -4,7 +4,7 @@ from gui import main_menu, about_page, select_maze, visualizer
 pygame.init()
 info = pygame.display.Info()
 screen_w, screen_h = info.current_w, info.current_h
-WINDOW_WIDTH, WINDOW_HEIGHT = int(screen_w * 0.7), int(screen_h * 0.7)
+WINDOW_WIDTH, WINDOW_HEIGHT = int(screen_w * 0.68), int(screen_h * 0.7)
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Maze Solver")
 clock = pygame.time.Clock()
