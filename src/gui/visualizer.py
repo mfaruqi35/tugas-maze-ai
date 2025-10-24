@@ -77,32 +77,32 @@ def draw_maze(surface, maze_rect, grid, start, exits, visited=None, path=None, f
             if val == -1:
                 surface.blit(wall_texture, rect)
             else:
-                pygame.draw.rect(surface, (255, 255, 255), rect)
-                pygame.draw.rect(surface, (180, 180, 180), rect, 1)
+                pygame.draw.rect(surface, (250, 250, 250), rect)
+                pygame.draw.rect(surface, (200, 200, 200), rect, 1)
 
             # warna sel frontier
             if frontier and (r, c) in frontier:
-                pygame.draw.rect(surface, (100, 200, 255), rect)
-                pygame.draw.rect(surface, (180, 180, 180), rect, 1)
+                pygame.draw.rect(surface, (255, 178, 0), rect)
+                pygame.draw.rect(surface, (200, 200, 200), rect, 1)
             # warna sel visited
             if visited and (r, c) in visited:
-                pygame.draw.rect(surface, (200, 200, 100), rect)
-                pygame.draw.rect(surface, (180, 180, 180), rect, 1)
+                pygame.draw.rect(surface, (64, 161, 255), rect)
+                pygame.draw.rect(surface, (200, 200, 200), rect, 1)
             # warna path akhir
             if path and (r, c) in path:
-                pygame.draw.rect(surface, (255, 180, 50), rect)
-                pygame.draw.rect(surface, (180, 180, 180), rect, 1)
+                pygame.draw.rect(surface, (255, 235, 34), rect)
+                pygame.draw.rect(surface, (200, 200, 200), rect, 1)
 
 
     # start
     sx, sy = start[1], start[0]
     srect = pygame.Rect(offset_x + sx * cell_size, offset_y + sy * cell_size, cell_size, cell_size)
-    pygame.draw.rect(surface, (50, 100, 255), srect)
+    pygame.draw.rect(surface, (0, 255, 1), srect)
 
     # exits
     for (er, ec) in exits:
         erect = pygame.Rect(offset_x + ec * cell_size, offset_y + er * cell_size, cell_size, cell_size)
-        pygame.draw.rect(surface, (0, 200, 0), erect)
+        pygame.draw.rect(surface, (233, 12, 9), erect)
 
 
 # ----------------------------------------------------------
@@ -171,6 +171,15 @@ def dfs_search_steps(grid, start):
                 stack.append((nr, nc))
     return steps, path, stack_history
 
+def draw_info_box(screen, font, text, x, y, w, h,
+                  bg_color=(255, 235, 34), border_color=(70, 70, 70), text_color=(0,0,0)):
+    rect = pygame.Rect(x, y, w, h)
+    pygame.draw.rect(screen, bg_color, rect, border_radius=10)
+    pygame.draw.rect(screen, border_color, rect, width=3, border_radius=10)
+    text_surf = font.render(text, True, text_color)
+    text_rect = text_surf.get_rect(center=rect.center)
+    screen.blit(text_surf, text_rect)
+    return rect
 
 # ----------------------------------------------------------
 # Fungsi utama: draw()
@@ -178,7 +187,6 @@ def dfs_search_steps(grid, start):
 def draw(screen, events, data):
     pygame.font.init()
     font = pygame.font.Font("assets/fonts/Eurostar Black/Eurostar Black.ttf", int(screen.get_height() * 0.02) + 10)
-    # btn_font = pygame.font.Font("assets/font/")
     small_font = pygame.font.Font("assets/fonts/Eurostar Regular/Eurostar Regular.ttf", 20)
     WINDOW_WIDTH, WINDOW_HEIGHT = screen.get_size()
     MARGIN, INNER_PADDING = int(WINDOW_WIDTH * 0.03), int(WINDOW_WIDTH * 0.005)
@@ -186,19 +194,33 @@ def draw(screen, events, data):
     frame_rect = pygame.Rect(MARGIN + 2, MARGIN, WINDOW_WIDTH - 2*MARGIN, WINDOW_HEIGHT - 2*MARGIN)
     left_width = int(frame_rect.width * 0.3)
     right_width = frame_rect.width - left_width - 10
-    left_panel = pygame.Rect(frame_rect.x, frame_rect.y, left_width, frame_rect.height)
-    right_panel = pygame.Rect(left_panel.right, frame_rect.y, right_width, frame_rect.height)
+    left_panel = pygame.Rect(frame_rect.x + 3, frame_rect.y + 3, left_width, frame_rect.height - 7)
+    right_panel = pygame.Rect(left_panel.right + 3, frame_rect.y + 3, right_width, frame_rect.height - 7)
 
-    pygame.draw.rect(screen, (100, 100, 100), left_panel)
-    pygame.draw.rect(screen, (255, 255, 255), right_panel)
+    # Frame border
+    pygame.draw.rect(screen, (50, 50, 50), frame_rect, width=4)
+
+    # Panels
+    pygame.draw.rect(screen, (220, 220, 220), left_panel)
+    pygame.draw.rect(screen, (250, 250, 250), right_panel)
+
+    # Panel Separator
+    pygame.draw.line(screen, (50, 50, 50), (left_panel.right, frame_rect.y), (left_panel.right, frame_rect.bottom - 2), 4)
+
 
     # tombol
-    btn_size = int(WINDOW_WIDTH * 0.05)
+    btn_size = 50
     back_button = Button(left_panel.x + INNER_PADDING, left_panel.y + INNER_PADDING, btn_size, btn_size, "<", bg_color=(250, 11, 7), hover_color=(212, 10, 7), active_color=(212, 10, 7))
+    
+    # Tulisan ALGORITMA
+    text_algo = font.render("ALGORITMA", True, (0, 0, 0))
+    text_algo_rect = text_algo.get_rect(midtop=(left_panel.centerx, back_button.rect.bottom + 20))
+    screen.blit(text_algo, text_algo_rect)
+
     algo_w = left_panel.width // 2.2
     algo_h = int(WINDOW_HEIGHT * 0.08)
-    bfs_button = Button(left_panel.x + INNER_PADDING + 5, back_button.rect.bottom + 40, algo_w, algo_h, "BFS")
-    dfs_button = Button(left_panel.x * 5.35 + INNER_PADDING, back_button.rect.bottom + 40, algo_w, algo_h, "DFS")
+    bfs_button = Button(left_panel.x + INNER_PADDING + 5, back_button.rect.bottom + 60, algo_w, algo_h, "BFS")
+    dfs_button = Button(left_panel.x * 4.95 + INNER_PADDING, back_button.rect.bottom + 60, algo_w, algo_h, "DFS")
 
     algo_mode = data.get("algo", "BFS")
     bfs_button.active = (algo_mode == "BFS")
@@ -241,6 +263,11 @@ def draw(screen, events, data):
     if data["frontiers"] and data["step_index"] < len(data["frontiers"]):
         frontier = data["frontiers"][data["step_index"]]
 
+    # Tulisan INFO
+    text_info = font.render("INFO", True, (0, 0, 0))
+    text_info_rect = text_info.get_rect(midtop=(left_panel.centerx, dfs_button.rect.bottom + 50))
+    screen.blit(text_info, text_info_rect)
+
     # Tampilkan info status
     current_step = data.get("step_index", 0)
     goal_reached = False
@@ -251,13 +278,29 @@ def draw(screen, events, data):
 
     step_goal = len(data["path_final"]) if goal_reached else 0
     step_total = current_step
+    # --- Kotak besar untuk info ---
+    info_box_w = left_panel.width - 40
+    info_box_h = 120
+    info_x = left_panel.x + 20
+    info_y = dfs_button.rect.bottom + 90
+    info_rect = pygame.Rect(info_x, info_y, info_box_w, info_box_h)
 
-    screen.blit(small_font.render(f"Status: {data['status']}", True, (255,255,255)),
-                (left_panel.x + INNER_PADDING + 10, dfs_button.rect.bottom + 80))
-    screen.blit(small_font.render(f"Langkah ke goal: {step_goal}", True, (255,255,255)),
-                (left_panel.x + INNER_PADDING + 10, dfs_button.rect.bottom + 120))
-    screen.blit(small_font.render(f"Total dikunjungi: {step_total}", True, (255,255,255)),
-                (left_panel.x + INNER_PADDING + 10, dfs_button.rect.bottom + 160))
+    # Gaya seperti tombol (tapi non-interaktif)
+    pygame.draw.rect(screen, (255, 235, 34), info_rect, border_radius=10)
+    pygame.draw.rect(screen, (70, 70, 70), info_rect, width=3, border_radius=10)
+
+    # --- Teks di dalam kotak ---
+    padding = 15
+    text_start_y = info_y + padding
+    line_spacing = 30
+
+    screen.blit(small_font.render(f"Status: {data['status']}", True, (0,0,0)),
+                (info_x + padding, text_start_y))
+    screen.blit(small_font.render(f"Langkah ke goal: {step_goal}", True, (0,0,0)),
+                (info_x + padding, text_start_y + line_spacing))
+    screen.blit(small_font.render(f"Total dikunjungi: {step_total}", True, (0,0,0)),
+                (info_x + padding, text_start_y + 2*line_spacing))
+
 
 
     # gambar maze
